@@ -16,49 +16,67 @@ export default function LeaderboardPage() {
   const leaderboard = [
     {
       rank: 1,
-      name: "Alex Chen",
+      name: "Ben Greenberg",
       points: 1250,
       badges: 8,
       connections: 45,
-      avatar: "/diverse-professional-woman.png",
+      avatar: null,
       trend: "up",
     },
     {
       rank: 2,
-      name: "Sarah Johnson",
+      name: "Toni",
       points: 1180,
       badges: 7,
       connections: 38,
-      avatar: "/professional-woman-designer.png",
+      avatar: null,
       trend: "up",
     },
     {
       rank: 3,
-      name: "Mike Rodriguez",
+      name: "Benjamin",
       points: 1050,
       badges: 6,
       connections: 42,
-      avatar: "/professional-man.png",
+      avatar: null,
       trend: "down",
     },
     {
       rank: 4,
-      name: userProfile?.name || "Emily Davis",
+      name: userProfile?.name || "Swagtimus",
       points: userProfile?.totalPoints || 980,
       badges: 5,
       connections: 35,
-      avatar: "/diverse-professional-woman.png",
+      avatar: null,
       trend: "up",
       isCurrentUser: true,
     },
     {
       rank: 5,
-      name: "David Kim",
+      name: "Takamasa",
       points: 920,
       badges: 5,
       connections: 29,
-      avatar: "/professional-man.png",
+      avatar: null,
       trend: "same",
+    },
+    {
+      rank: 6,
+      name: "Dablendo",
+      points: 850,
+      badges: 4,
+      connections: 25,
+      avatar: null,
+      trend: "up",
+    },
+    {
+      rank: 7,
+      name: "Aditi Chopra",
+      points: 780,
+      badges: 4,
+      connections: 22,
+      avatar: null,
+      trend: "up",
     },
   ]
 
@@ -159,7 +177,6 @@ export default function LeaderboardPage() {
               >
                 <div className="mb-4">{getRankIcon(user.rank)}</div>
                 <Avatar className="w-16 h-16 mx-auto mb-4">
-                  <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
                   <AvatarFallback>
                     {user.name
                       .split(" ")
@@ -194,7 +211,6 @@ export default function LeaderboardPage() {
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center justify-center w-8">{getRankIcon(user.rank)}</div>
                       <Avatar className="w-10 h-10">
-                        <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
                         <AvatarFallback>
                           {user.name
                             .split(" ")

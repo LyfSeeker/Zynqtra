@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge" // Added Badge import
 import { Checkbox } from "@/components/ui/checkbox" // Added Checkbox import
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select" // Added Select import
 import { Trophy, Coins, Users, Mail } from "lucide-react" // Added Users and Mail icons
 import { useState, useEffect } from "react" // Added useEffect
 import { useWallet } from "@/contexts/wallet-context" // Added wallet context
@@ -18,38 +19,66 @@ import { useToast } from "@/hooks/use-toast" // Added toast
 const mockUsers = [
   {
     id: "1",
-    name: "Sarah Chen",
-    email: "sarah@example.com",
+    name: "Ben Greenberg",
+    email: "ben@example.com",
     interests: ["Web3", "DeFi", "Product Management"],
     walletAddress: "0x1234...5678",
+    zPoints: 1250,
+    connections: 45,
   },
   {
     id: "2",
-    name: "Marcus Johnson",
-    email: "marcus@example.com",
+    name: "Toni",
+    email: "toni@example.com",
     interests: ["React", "Node.js", "Web3"],
     walletAddress: "0x2345...6789",
+    zPoints: 1180,
+    connections: 38,
   },
   {
     id: "3",
-    name: "Elena Rodriguez",
-    email: "elena@example.com",
+    name: "Benjamin",
+    email: "benjamin@example.com",
     interests: ["UX/UI Design", "AI/ML", "Startups"],
     walletAddress: "0x3456...7890",
+    zPoints: 1050,
+    connections: 42,
   },
   {
     id: "4",
-    name: "David Kim",
-    email: "david@example.com",
+    name: "Takamasa",
+    email: "takamasa@example.com",
     interests: ["Blockchain", "Smart Contracts", "DeFi"],
     walletAddress: "0x4567...8901",
+    zPoints: 920,
+    connections: 29,
   },
   {
     id: "5",
-    name: "Lisa Wang",
-    email: "lisa@example.com",
+    name: "Swagtimus",
+    email: "swagtimus@example.com",
     interests: ["Marketing", "Entrepreneurship", "NFTs"],
     walletAddress: "0x5678...9012",
+    zPoints: 980,
+    connections: 35,
+  },
+  {
+    id: "6",
+    name: "Dablendo",
+    email: "dablendo@example.com",
+    interests: ["Web3", "Gaming", "Community"],
+    walletAddress: "0x6789...0123",
+    zPoints: 850,
+    connections: 25,
+  },
+  {
+    id: "7",
+    name: "Aditi Chopra",
+    email: "aditi@example.com",
+    interests: ["AI/ML", "Data Science", "Web3"],
+    walletAddress: "0x7890...1234",
+    zPoints: 780,
+    connections: 22,
   },
 ]
 
@@ -68,6 +97,7 @@ export default function HostEventPage() {
   })
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]) // Added selected users state
   const [filteredUsers, setFilteredUsers] = useState(mockUsers) // Added filtered users state
+  const [filterType, setFilterType] = useState<"all" | "highest-z-points" | "highest-connections" | "matching-interests">("all") // Added filter type state
 
   const availableInterests = [
     "Web3",
@@ -92,16 +122,43 @@ export default function HostEventPage() {
     "Python",
   ]
 
-  useEffect(() => {
-    if (eventData.targetInterests.length === 0) {
-      setFilteredUsers(mockUsers)
-    } else {
-      const filtered = mockUsers.filter((user) =>
-        user.interests.some((interest) => eventData.targetInterests.includes(interest)),
-      )
-      setFilteredUsers(filtered)
+  // Filter users based on selected filter type
+  const applyFilters = () => {
+    let filtered = [...mockUsers]
+
+    switch (filterType) {
+      case "highest-z-points":
+        filtered = filtered.sort((a, b) => b.zPoints - a.zPoints)
+        break
+      case "highest-connections":
+        filtered = filtered.sort((a, b) => b.connections - a.connections)
+        break
+      case "matching-interests":
+        if (eventData.targetInterests.length > 0) {
+          filtered = filtered
+            .map(user => ({
+              ...user,
+              matchScore: user.interests.filter(interest => 
+                eventData.targetInterests.includes(interest)
+              ).length
+            }))
+            .filter(user => user.matchScore > 0)
+            .sort((a, b) => b.matchScore - a.matchScore)
+        }
+        break
+      default:
+        // "all" - no additional filtering
+        break
     }
-  }, [eventData.targetInterests])
+
+    setFilteredUsers(filtered)
+  }
+
+  // Apply filters when filter type or event interests change
+  useEffect(() => {
+    applyFilters()
+  }, [filterType, eventData.targetInterests])
+
 
   if (!isConnected) {
     return (
@@ -346,10 +403,28 @@ export default function HostEventPage() {
               </h2>
 
               <div className="mb-4">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-sm font-medium">Filter Users</Label>
+                  <Select value={filterType} onValueChange={(value: any) => setFilterType(value)}>
+                    <SelectTrigger className="w-48 glassmorphism bg-background/50">
+                      <SelectValue placeholder="Select filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Users</SelectItem>
+                      <SelectItem value="highest-z-points">Highest Z Points</SelectItem>
+                      <SelectItem value="highest-connections">Highest Connections</SelectItem>
+                      <SelectItem value="matching-interests">Matching Interests</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
                 <p className="text-sm text-muted-foreground mb-2">
-                  {eventData.targetInterests.length > 0
+                  {filterType === "matching-interests" && eventData.targetInterests.length > 0
                     ? `Showing users with interests: ${eventData.targetInterests.join(", ")}`
-                    : "Showing all users (select interests above to filter)"}
+                    : filterType === "highest-z-points"
+                    ? "Showing users sorted by highest Z points"
+                    : filterType === "highest-connections"
+                    ? "Showing users sorted by highest connections"
+                    : "Showing all users"}
                 </p>
                 <Badge className="bg-accent/20 text-accent">
                   {filteredUsers.length} users found • {selectedUsers.length} selected
@@ -370,6 +445,16 @@ export default function HostEventPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="font-medium text-foreground truncate">{user.name}</h4>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span className="flex items-center">
+                            <Coins className="w-3 h-3 mr-1" />
+                            {user.zPoints} Z
+                          </span>
+                          <span className="flex items-center">
+                            <Users className="w-3 h-3 mr-1" />
+                            {user.connections}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center text-xs text-muted-foreground mb-2">
                         <Mail className="w-3 h-3 mr-1" />

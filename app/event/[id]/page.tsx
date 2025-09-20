@@ -34,16 +34,16 @@ export default function EventPage({ params }: { params: { id: string } }) {
   const challenges = [
     { id: 1, title: "Connect with 5 people using QR code", progress: 60, reward: 50, completed: false },
     { id: 2, title: "Complete your profile", progress: 100, reward: 25, completed: true },
-    { id: 3, title: "Join a group discussion", progress: 0, reward: 30, completed: false },
+    { id: 3, title: "Attend a workshop", progress: 0, reward: 30, completed: false },
     { id: 4, title: "Share your project", progress: 0, reward: 40, completed: false },
   ]
 
   const leaderboard = [
-    { rank: 1, name: "Alex Chen", points: 420, avatar: "AC" },
-    { rank: 2, name: "Sarah Kim", points: 380, avatar: "SK" },
-    { rank: 3, name: "Mike Johnson", points: 350, avatar: "MJ" },
+    { rank: 1, name: "Ben Greenberg", points: 420, avatar: "BG" },
+    { rank: 2, name: "Toni", points: 380, avatar: "T" },
+    { rank: 3, name: "Benjamin", points: 350, avatar: "B" },
     { rank: 4, name: userProfile?.name || "You", points: userPoints, avatar: "YU" },
-    { rank: 5, name: "Emma Davis", points: 120, avatar: "ED" },
+    { rank: 5, name: "Takamasa", points: 120, avatar: "T" },
   ]
 
   const miniGames = [
