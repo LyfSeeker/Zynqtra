@@ -58,7 +58,7 @@ export default function MiniGamesPage() {
   ]
 
   const handlePlayGame = (gameId: number) => {
-    console.log("[v0] Starting game:", gameId)
+    console.log("[ZYNQTRA] Starting game:", gameId)
   }
 
   const getStatusColor = (status: string) => {

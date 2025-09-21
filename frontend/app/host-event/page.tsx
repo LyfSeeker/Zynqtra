@@ -197,8 +197,8 @@ export default function HostEventPage() {
       return
     }
 
-    console.log("[v0] Creating event:", eventData)
-    console.log("[v0] Selected users:", selectedUsers)
+    console.log("[ZYNQTRA] Creating event:", eventData)
+    console.log("[ZYNQTRA] Selected users:", selectedUsers)
 
     if (userProfile) {
       const updatedProfile = {

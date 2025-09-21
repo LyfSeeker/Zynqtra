@@ -39,9 +39,47 @@ const rajdhani = Rajdhani({
 })
 
 export const metadata: Metadata = {
-  title: "v0 App",
-  description: "Created with v0",
-  generator: "v0.app",
+  title: "ZYNQTRA - Web3 Networking Platform",
+  description: "Connect, Build, and Grow in the Decentralized World with ZYNQTRA. Join events, earn badges, and build meaningful connections in the Web3 ecosystem.",
+  keywords: ["web3", "networking", "blockchain", "events", "connections", "arbitrum", "defi", "nft"],
+  authors: [{ name: "ZYNQTRA Team" }],
+  icons: {
+    icon: [
+      { url: "/zynqtralogobg.png", sizes: "32x32", type: "image/png" },
+      { url: "/zynqtralogobg.png", sizes: "16x16", type: "image/png" },
+    ],
+    shortcut: "/zynqtralogobg.png",
+    apple: [
+      { url: "/zynqtralogobg.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  openGraph: {
+    title: "ZYNQTRA - Web3 Networking Platform",
+    description: "Connect, Build, and Grow in the Decentralized World",
+    url: "https://zynqtra.com",
+    siteName: "ZYNQTRA",
+    images: [
+      {
+        url: "/zynqtralogobg.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ZYNQTRA - Web3 Networking Platform",
+    description: "Connect, Build, and Grow in the Decentralized World",
+    images: ["/zynqtralogobg.png"],
+  },
+}
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#000000",
 }
 
 export default function RootLayout({

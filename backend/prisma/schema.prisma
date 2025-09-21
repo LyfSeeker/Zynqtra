@@ -1,0 +1,456 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  walletAddress String   @unique
+  name          String?
+  email         String?
+  bio           String?
+  
+  // IPFS hash for complete profile metadata
+  ipfsHash      String?
+  
+  // On-chain data references
+  profileTokenId BigInt?
+  totalPoints    Int      @default(0)
+  level          Int      @default(1)
+  
+  // Social links
+  linkedinUsername String?
+  twitterUsername  String?
+  githubUsername   String?
+  
+  // Profile image
+  profileImageUrl String?
+  
+  // Interests and skills (stored as JSON arrays)
+  interests     Json?
+  skills        Json?
+  location      String?
+  
+  // Activity tracking
+  eventsAttended    Int @default(0)
+  eventsHosted      Int @default(0)
+  connectionsCount  Int @default(0)
+  badgesEarned      Int @default(0)
+  
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastActive    DateTime @default(now())
+  
+  // Relations
+  hostedEvents     Event[]       @relation("EventHost")
+  eventAttendances EventAttendance[]
+  userBadges       UserBadge[]
+  connections      Connection[]  @relation("UserConnections")
+  sentRequests     Connection[]  @relation("ConnectionRequests")
+  challenges       UserChallenge[]
+  pointsHistory    PointsTransaction[]
+  activities       ActivityLog[]
+  
+  @@map("users")
+}
+
+model Event {
+  id              String   @id @default(cuid())
+  eventId         BigInt?  // On-chain event ID
+  title           String
+  description     String
+  location        String
+  
+  // IPFS hash for complete event metadata
+  ipfsHash        String?
+  
+  // Host information
+  hostId          String
+  host            User     @relation("EventHost", fields: [hostId], references: [id])
+  
+  // Event details
+  startTime       DateTime
+  endTime         DateTime
+  maxAttendees    Int
+  registrationFee BigInt   @default(0)
+  eventType       Int      @default(0)
+  pointsReward    Int      @default(0)
+  requiresApproval Boolean  @default(false)
+  
+  // Target interests (stored as JSON array)
+  targetInterests Json?
+  
+  // Event status
+  status          EventStatus @default(UPCOMING)
+  
+  // Blockchain transaction details
+  txHash          String?
+  blockNumber     BigInt?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  attendances     EventAttendance[]
+  
+  @@map("events")
+}
+
+model EventAttendance {
+  id         String   @id @default(cuid())
+  userId     String
+  eventId    String
+  
+  user       User     @relation(fields: [userId], references: [id])
+  event      Event    @relation(fields: [eventId], references: [id])
+  
+  // Attendance details
+  registeredAt DateTime @default(now())
+  checkedIn    Boolean  @default(false)
+  checkedInAt  DateTime?
+  
+  // QR code for check-in
+  qrCodeHash   String?
+  
+  // Blockchain transaction details
+  txHash       String?
+  blockNumber  BigInt?
+  
+  @@unique([userId, eventId])
+  @@map("event_attendances")
+}
+
+model Badge {
+  id           String      @id @default(cuid())
+  badgeId      BigInt?     // On-chain badge ID
+  name         String
+  description  String
+  
+  // IPFS hash for badge metadata
+  ipfsHash     String?
+  imageUrl     String?
+  
+  // Badge properties
+  badgeType    Int         @default(0)
+  rarity       BadgeRarity @default(COMMON)
+  pointsRequired Int       @default(0)
+  maxSupply    Int?
+  currentSupply Int        @default(0)
+  isTransferable Boolean   @default(true)
+  isActive     Boolean     @default(true)
+  
+  // Creator information
+  creatorAddress String?
+  
+  // Blockchain transaction details
+  txHash       String?
+  blockNumber  BigInt?
+  
+  // Timestamps
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  
+  // Relations
+  userBadges   UserBadge[]
+  
+  @@map("badges")
+}
+
+model UserBadge {
+  id          String   @id @default(cuid())
+  userId      String
+  badgeId     String
+  
+  user        User     @relation(fields: [userId], references: [id])
+  badge       Badge    @relation(fields: [badgeId], references: [id])
+  
+  // Award details
+  source      String   // How the badge was earned
+  pointsEarned Int     @default(0)
+  awardedAt   DateTime @default(now())
+  
+  // Blockchain transaction details
+  txHash      String?
+  blockNumber BigInt?
+  tokenId     BigInt?  // NFT token ID if applicable
+  
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model Connection {
+  id          String           @id @default(cuid())
+  fromUserId  String
+  toUserId    String
+  
+  fromUser    User             @relation("ConnectionRequests", fields: [fromUserId], references: [id])
+  toUser      User             @relation("UserConnections", fields: [toUserId], references: [id])
+  
+  status      ConnectionStatus @default(PENDING)
+  
+  // Timestamps
+  requestedAt DateTime         @default(now())
+  acceptedAt  DateTime?
+  
+  // Blockchain transaction details
+  txHash      String?
+  blockNumber BigInt?
+  
+  @@unique([fromUserId, toUserId])
+  @@map("connections")
+}
+
+model Challenge {
+  id           String    @id @default(cuid())
+  challengeId  BigInt?   // On-chain challenge ID
+  title        String
+  description  String
+  
+  // IPFS hash for challenge metadata
+  ipfsHash     String?
+  
+  // Challenge details
+  challengeType Int      @default(0)
+  difficulty   ChallengeDifficulty @default(EASY)
+  pointsReward Int      @default(0)
+  timeLimit    Int?     // in seconds
+  maxAttempts  Int      @default(1)
+  
+  // Requirements and validation
+  requirements Json?
+  validationCriteria Json?
+  
+  // Challenge status
+  isActive     Boolean  @default(true)
+  startDate    DateTime?
+  endDate      DateTime?
+  
+  // Creator information
+  creatorAddress String?
+  
+  // Blockchain transaction details
+  txHash       String?
+  blockNumber  BigInt?
+  
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  userChallenges UserChallenge[]
+  
+  @@map("challenges")
+}
+
+model UserChallenge {
+  id          String          @id @default(cuid())
+  userId      String
+  challengeId String
+  
+  user        User            @relation(fields: [userId], references: [id])
+  challenge   Challenge       @relation(fields: [challengeId], references: [id])
+  
+  // Attempt details
+  status      ChallengeStatus @default(NOT_STARTED)
+  attempts    Int             @default(0)
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  // Submission data
+  submissionData Json?
+  score       Int?
+  
+  // Blockchain transaction details
+  txHash      String?
+  blockNumber BigInt?
+  
+  @@unique([userId, challengeId])
+  @@map("user_challenges")
+}
+
+model IPFSContent {
+  id          String      @id @default(cuid())
+  hash        String      @unique
+  contentType ContentType
+  
+  // Content metadata
+  size        BigInt?
+  mimeType    String?
+  filename    String?
+  
+  // Reference information
+  entityType  String      // 'user_profile', 'event', 'badge', 'challenge'
+  entityId    String
+  
+  // IPFS details
+  isPinned    Boolean     @default(false)
+  pinnedAt    DateTime?
+  
+  // Timestamps
+  uploadedAt  DateTime    @default(now())
+  lastAccessed DateTime   @default(now())
+  
+  @@map("ipfs_content")
+}
+
+model Transaction {
+  id              String      @id @default(cuid())
+  txHash          String      @unique
+  blockNumber     BigInt
+  blockHash       String?
+  
+  // Transaction details
+  fromAddress     String
+  toAddress       String?
+  gasUsed         BigInt?
+  gasPrice        BigInt?
+  value           BigInt?
+  
+  // Contract interaction details
+  contractAddress String?
+  functionName    String?
+  functionArgs    Json?
+  
+  // Event information
+  eventName       String?
+  eventArgs       Json?
+  
+  // Reference to related entities
+  entityType      String?     // 'user', 'event', 'badge', 'challenge'
+  entityId        String?
+  
+  // Transaction status
+  status          TransactionStatus @default(PENDING)
+  confirmations   Int         @default(0)
+  
+  // Error information
+  errorMessage    String?
+  
+  // Timestamps
+  timestamp       DateTime
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@map("transactions")
+}
+
+model PointsTransaction {
+  id          String              @id @default(cuid())
+  userId      String
+  
+  // Transaction details
+  points      Int                 // Can be negative for deductions
+  type        PointsTransactionType
+  source      String              // event_attendance, badge_award, manual, etc.
+  sourceId    String?             // Related entity ID (eventId, badgeId, etc.)
+  
+  // Metadata
+  description String?
+  metadata    Json?
+  
+  // Balance tracking
+  balanceBefore Int
+  balanceAfter  Int
+  
+  // Timestamps
+  createdAt   DateTime            @default(now())
+  
+  // Relations
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("points_transactions")
+}
+
+model ActivityLog {
+  id          String      @id @default(cuid())
+  userId      String
+  
+  // Activity details
+  action      String      // created_profile, joined_event, earned_badge, etc.
+  entityType  String      // user, event, badge, connection
+  entityId    String?
+  
+  // Activity data
+  metadata    Json?
+  description String?
+  
+  // Context
+  ipAddress   String?
+  userAgent   String?
+  
+  // Timestamps
+  createdAt   DateTime    @default(now())
+  
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("activity_logs")
+}
+
+// Enums
+enum PointsTransactionType {
+  EARNED
+  SPENT  
+  BONUS
+  PENALTY
+  ADJUSTMENT
+}
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum BadgeRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+enum ConnectionStatus {
+  PENDING
+  ACCEPTED
+  BLOCKED
+}
+
+enum ChallengeDifficulty {
+  EASY
+  MEDIUM
+  HARD
+  EXPERT
+}
+
+enum ChallengeStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum ContentType {
+  USER_PROFILE
+  EVENT_METADATA
+  BADGE_METADATA
+  CHALLENGE_METADATA
+  IMAGE
+  DOCUMENT
+  OTHER
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
