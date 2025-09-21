@@ -24,6 +24,19 @@ Zynqtra is a gamified networking platform designed to make real world events suc
 - **Wallet Connection**: Wagmi and MetaMask  
 - **Storage**: IPFS  
 
+## Smart Contracts Deployment
+
+All core Zynqtra smart contracts are deployed on the Arbitrum Sepolia Testnet. The deployed contract addresses are:
+
+- **ZynqtraProfile:** 0x47Ff5399f4141E7be482A33b393E0f8B68e55134  
+- **ZynqtraEvents:** 0x124Bb7A4E6a913f82b3D21D2dCF4018Dc0AA158B  
+- **ZynqtraBadges:** 0x2592DA494064FB8a30610eaE96aba7Bcb8A06728  
+- **ZynqtraChallenges:** 0x7241e15f1633a8Cea02509071164D99C3Bc4486A  
+- **ZynqtraMain:** 0x759918647EcA0e6380B5eB8437Bd89B4A6a984aA  
+
+These contracts handle participant profiles, event creation, challenges, and the core leaderboard logic. They are fully integrated with the frontend via MetaMask and Wagmi for seamless interaction on the Arbitrum Sepolia Testnet.
+
+
 ---
 
 ## Why Arbitrum
